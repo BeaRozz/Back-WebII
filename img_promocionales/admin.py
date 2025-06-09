@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Img_Promocional
+
+admin.site.register(Img_Promocional)
