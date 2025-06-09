@@ -21,5 +21,8 @@ from usuarios.views import login_usuario
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/', login_usuario, name='login_usuario'),
-    path('api/', include('fundaciones.urls'))
+    path('api/', include('fundaciones.urls')),
+    path('api/', include('categorias.urls')),
+    path('api/', include('img_promocionales.urls')),
+    path('api/', include('lugares.urls')),
 ]
