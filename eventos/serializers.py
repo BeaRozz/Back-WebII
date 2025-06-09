@@ -25,7 +25,7 @@ class EventoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
         
-#Serializador para crear eventos con validaciones específicas
+#Serializador para crear eventos con validaciones específicas igual edita
 class EventoSerializerCreate(serializers.ModelSerializer):
     fundacion = serializers.CharField()
     lugar = serializers.CharField()
@@ -78,5 +78,24 @@ class EventoSerializerCreate(serializers.ModelSerializer):
             **validated_data
         )
         return evento
+    
+    def update(self, instance, validated_data):
+        fundacion_nombre = validated_data.pop('fundacion')
+        lugar_nombre = validated_data.pop('lugar')
+        categoria_nombre = validated_data.pop('categoria')
+        imagen_nombre = validated_data.pop('imagen')
 
-#class EventoSerializerUpdate(serializers.ModelSerializer):
+        if fundacion_nombre:
+            instance.fundacion = Fundacion.objects.get(nombre=fundacion_nombre)
+        if lugar_nombre:
+            instance.lugar = Lugar.objects.get(nombre=lugar_nombre)
+        if categoria_nombre:
+            instance.categoria = Categoria.objects.get(nombre=categoria_nombre)
+        if imagen_nombre:
+            instance.imagen = Img_Promocional.objects.get(nombre=imagen_nombre)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance

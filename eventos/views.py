@@ -49,3 +49,31 @@ def crear_evento(request):
             )
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#Editar evento
+@api_view(['PUT', 'PATCH'])
+@permission_classes([TokenAuthPermission])
+def editar_evento(request, id):
+    try:
+        evento = Evento.objects.get(id=id)
+    except Evento.DoesNotExist:
+        return Response({"error": "Evento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = EventoSerializerCreate(evento, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#Borrar evento
+@api_view(['DELETE'])
+@permission_classes([TokenAuthPermission])
+def eliminar_evento(request, id):
+    try:
+        evento = Evento.objects.get(id=id)
+        evento.delete()
+        return Response({"mensaje": "Evento eliminado"}, status=status.HTTP_204_NO_CONTENT)
+    except Evento.DoesNotExist:
+        return Response({"error": "Evento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
