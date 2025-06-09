@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'eventos',
     'fundaciones',
     'usuarios',
+    'categorias',
+    'lugares',
+    'img_promocionales'
 ]
 
 MIDDLEWARE = [
