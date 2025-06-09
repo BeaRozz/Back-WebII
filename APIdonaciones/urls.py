@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/', include('categorias.urls')),
     path('api/', include('img_promocionales.urls')),
     path('api/', include('lugares.urls')),
+    path('api/', include('eventos.urls')),
 ]
