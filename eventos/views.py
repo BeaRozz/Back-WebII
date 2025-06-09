@@ -1,3 +1,79 @@
-from django.shortcuts import render
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from usuarios.auth import TokenAuthPermission
+from .models import Evento
+from .serializers import EventoSerializer, EventoSerializerCreate
+from rest_framework import status
 
-# Create your views here.
+#Obtener todos los eventos
+@api_view(['GET'])
+@permission_classes([TokenAuthPermission])
+def lista_eventos(request):
+    eventos = Evento.objects.all()
+    serializer = EventoSerializer(eventos, many=True)
+    return Response(serializer.data)
+
+#Obtener evento por ID
+@api_view(['GET'])
+@permission_classes([TokenAuthPermission])
+def detalle_evento(request, id):
+    try:
+        evento = Evento.objects.get(id=id)
+    except Evento.DoesNotExist:
+        return Response(
+            {"error": f"No se encontró el evento con ID {id}"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {"error": "Error inesperado", "detalle": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    serializer = EventoSerializer(evento)
+    return Response(serializer.data)
+
+#Crear un nuevo evento
+@api_view(['POST'])
+@permission_classes([TokenAuthPermission])
+def crear_evento(request):
+    serializer = EventoSerializerCreate(data=request.data)
+    if serializer.is_valid():
+        try:
+            evento = serializer.save()
+            return Response(EventoSerializer(evento).data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(
+                {"error": "Error al crear evento", "detalle": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#Editar evento
+@api_view(['PUT', 'PATCH'])
+@permission_classes([TokenAuthPermission])
+def editar_evento(request, id):
+    try:
+        evento = Evento.objects.get(id=id)
+    except Evento.DoesNotExist:
+        return Response({"error": "Evento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = EventoSerializerCreate(evento, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#Borrar evento
+@api_view(['DELETE'])
+@permission_classes([TokenAuthPermission])
+def eliminar_evento(request, id):
+    try:
+        evento = Evento.objects.get(id=id)
+        evento.delete()
+        return Response({"mensaje": "Evento eliminado"}, status=status.HTTP_204_NO_CONTENT)
+    except Evento.DoesNotExist:
+        return Response({"error": "Evento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
